@@ -233,9 +233,20 @@ function auth_oidc_delete_token(int $tokenid) {
  * @return array
  */
 function auth_oidc_get_remote_fields() {
+    $bindingusernameclaim = get_config('auth_oidc', 'bindingusernameclaim');
+
+    if (empty($bindingusernameclaim) || $bindingusernameclaim === 'auto') {
+        if (get_config('auth_oidc', 'idptype') == AUTH_OIDC_IDP_TYPE_MICROSOFT) {
+            $bindingusernameclaim = 'preferred_username';
+        } else {
+            $bindingusernameclaim = 'upn';
+        }
+    }
+
     if (auth_oidc_is_local_365_installed()) {
         $remotefields = [
             '' => get_string('settings_fieldmap_feild_not_mapped', 'auth_oidc'),
+            $bindingusernameclaim => get_string('settings_fieldmap_field_bindingusernameclaim', 'auth_oidc'),
             'objectId' => get_string('settings_fieldmap_field_objectId', 'auth_oidc'),
             'userPrincipalName' => get_string('settings_fieldmap_field_userPrincipalName', 'auth_oidc'),
             'displayName' => get_string('settings_fieldmap_field_displayName', 'auth_oidc'),
@@ -293,6 +304,7 @@ function auth_oidc_get_remote_fields() {
     } else {
         $remotefields = [
             '' => get_string('settings_fieldmap_feild_not_mapped', 'auth_oidc'),
+            $bindingusernameclaim => get_string('settings_fieldmap_field_bindingusernameclaim', 'auth_oidc'),
             'objectId' => get_string('settings_fieldmap_field_objectId', 'auth_oidc'),
             'userPrincipalName' => get_string('settings_fieldmap_field_userPrincipalName', 'auth_oidc'),
             'givenName' => get_string('settings_fieldmap_field_givenName', 'auth_oidc'),
