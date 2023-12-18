@@ -529,11 +529,10 @@ class authcode extends base {
         }
 
         // Find the latest real Microsoft username.
-        // Determine remote username depending on IdP type, or fall back to standard 'sub'.
         $oidcusername = $this->get_oidc_username_from_token_claim($idtoken);
 
         $usernamechanged = false;
-        if ($oidcusername && $tokenrec && strtolower($oidcusername) !== strtolower($tokenrec->oidcusername)) {
+        if ($oidcusername && $tokenrec && strtolower($oidcusername) !== strtolower($tokenrec->useridentifier)) {
             $usernamechanged = true;
         }
 
@@ -569,7 +568,7 @@ class authcode extends base {
                 }
                 $tokenrec->userid = $user->id;
                 if ($usernamechanged) {
-                    $tokenrec->oidcusername = $oidcusername;
+                    $tokenrec->useridentifier = $oidcusername;
                 }
                 $DB->update_record('auth_oidc_token', $tokenrec);
             } else {
@@ -604,7 +603,7 @@ class authcode extends base {
                             user_update_user($user, false);
 
                             $fullmessage = 'Attempt to change username of user ' . $user->id . ' from ' .
-                                $tokenrec->oidcusername . ' to ' . $oidcusername;
+                                $tokenrec->useridentifier . ' to ' . $oidcusername;
                             $event = user_rename_attempt::create(['objectid' => $user->id, 'other' => $fullmessage,
                                 'userid' => $user->id]);
                             $event->trigger();
@@ -612,7 +611,7 @@ class authcode extends base {
                             $tokenrec->username = $oidcusername;
                         }
 
-                        $tokenrec->oidcusername = $oidcusername;
+                        $tokenrec->useridentifier = $oidcusername;
                         $DB->update_record('auth_oidc_token', $tokenrec);
                     }
 
